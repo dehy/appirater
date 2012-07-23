@@ -136,9 +136,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
 	UIAlertView		*ratingAlert;
+    NSInteger       appId;
 }
 
 @property(nonatomic, retain) UIAlertView *ratingAlert;
+@property(nonatomic, assign) NSInteger   appId;
 
 /*
  DEPRECATED: While still functional, it's better to use
@@ -146,7 +148,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  
  Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
  */
-+ (void)appLaunched;
++ (void)appLaunchedWithId:(NSInteger)appId;
 
 /*
  Tells Appirater that the app has launched, and on devices that do NOT
@@ -161,7 +163,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  can also be triggered by appEnteredForeground: and userDidSignificantEvent:
  (as long as you pass YES for canPromptForRating in those methods).
  */
-+ (void)appLaunched:(BOOL)canPromptForRating;
++ (void)appWithId:(NSInteger)appId launched:(BOOL)canPromptForRating;
 
 /*
  Tells Appirater that the app was brought to the foreground on multitasking
@@ -175,7 +177,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  can also be triggered by appLaunched: and userDidSignificantEvent:
  (as long as you pass YES for canPromptForRating in those methods).
  */
-+ (void)appEnteredForeground:(BOOL)canPromptForRating;
++ (void)appWithId:(NSInteger)appId enteredForeground:(BOOL)canPromptForRating;
 
 /*
  Tells Appirater that the user performed a significant event. A significant
@@ -191,7 +193,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  and appEnteredForeground: (as long as you pass YES for canPromptForRating
  in those methods).
  */
-+ (void)userDidSignificantEvent:(BOOL)canPromptForRating;
++ (void)userDidSignificantEvent:(BOOL)canPromptForRating inAppWithId:(NSInteger)appId;
 
 /*
  Tells Appirater to open the App Store page where the user can specify a
@@ -204,6 +206,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  and let Appirater handle the bookkeeping of deciding when to ask the user
  whether to rate the app.
  */
-+ (void)rateApp;
++ (void)rateAppWithId:(NSInteger)appId;
 
 @end

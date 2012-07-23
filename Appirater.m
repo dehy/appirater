@@ -60,6 +60,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 @implementation Appirater 
 
 @synthesize ratingAlert;
+@synthesize appId;
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -281,13 +282,14 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	}
 }
 
-+ (void)appLaunched {
-	[Appirater appLaunched:YES];
++ (void)appLaunchedWithId:(NSInteger)appId {
+	[Appirater appWithId:appId launched:YES];
 }
 
-+ (void)appLaunched:(BOOL)canPromptForRating {
++ (void)appWithId:(NSInteger)appId launched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
+                       [[Appirater sharedInstance] setAppId:appId];
                        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
                    });
 }
@@ -306,26 +308,29 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[[Appirater sharedInstance] hideRatingAlert];
 }
 
-+ (void)appEnteredForeground:(BOOL)canPromptForRating {
++ (void)appWithId:(NSInteger)appId enteredForeground:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
+                       [[Appirater sharedInstance] setAppId:appId];
                        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
                    });
 }
 
-+ (void)userDidSignificantEvent:(BOOL)canPromptForRating {
++ (void)userDidSignificantEvent:(BOOL)canPromptForRating inAppWithId:(NSInteger)appId {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
+                       [[Appirater sharedInstance] setAppId:appId];
                        [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
                    });
 }
 
-+ (void)rateApp {
++ (void)rateAppWithId:(NSInteger)appId {
 #if TARGET_IPHONE_SIMULATOR
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
+    [[Appirater sharedInstance] setAppId:appId];
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", appId]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
@@ -346,7 +351,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		case 1:
 		{
 			// they want to rate it
-			[Appirater rateApp];
+			[Appirater rateAppWithId:[[Appirater sharedInstance] appId]];
 			break;
 		}
 		case 2:
